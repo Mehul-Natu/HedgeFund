@@ -5,6 +5,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.client.RequestBuilding.Get
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpMethod, HttpMethods, HttpProtocols, HttpRequest, HttpResponse, StatusCodes, Uri, headers}
 import akka.util.ByteString
+import stocks.Stock.StockRequestResponse
 
 import scala.concurrent.duration.DurationInt
 import scala.io.Source.fromURL
@@ -25,8 +26,13 @@ class FMPClientHandler(val apiKey: String) {
 object FMPClientHandler {
 
   trait HttpRequestAndResponse
-  case class HttpGetPriceRequest(stockName: String, exchangeName: String, replyTo: ActorRef[HttpRequestAndResponse]) extends HttpRequestAndResponse
-  case class HttpGetPriceResponse(success: Boolean, httpEntity: HttpEntity, replyTo: ActorRef[HttpRequestAndResponse]) extends HttpRequestAndResponse
+  case class HttpGetPriceRequest(stockName: String, exchangeName: String, replyTo: ActorRef[StockRequestResponse]) extends HttpRequestAndResponse
+  case class HttpGetPriceSuccessResponse(httpEntity: HttpEntity, replyTo: ActorRef[StockRequestResponse]) extends HttpRequestAndResponse
+  case class HttpGetPriceFailureResponse(message: String, replyTo: ActorRef[StockRequestResponse]) extends HttpRequestAndResponse
+  case class EntityGetPriceSuccessResponse(entityString: String, replyTo: ActorRef[StockRequestResponse]) extends HttpRequestAndResponse
+  case class EntityGetPriceFailureResponse(ExceptionMessage: String, replyTo: ActorRef[StockRequestResponse]) extends HttpRequestAndResponse
+
+
   import HttpClient._
 
   def apply(): Behavior[HttpRequestAndResponse] = Behaviors.setup(context => {
@@ -42,26 +48,36 @@ object FMPClientHandler {
           case Success(httpResponse) => httpResponse match {
             case HttpResponse(StatusCodes.OK, headers, entity, _) =>
               println("headers" + headers)
-              HttpGetPriceResponse(true, entity, replyTo)
+              HttpGetPriceSuccessResponse(entity, replyTo)
             case resp@HttpResponse(code, _, _, _) =>
               resp.discardEntityBytes()
-              HttpGetPriceResponse(false, null, replyTo)
+              HttpGetPriceFailureResponse(code.defaultMessage(), replyTo)
           }
-          case Failure(exception) => {
-            HttpGetPriceResponse(false, null, replyTo)
-          }
+          case Failure(exception) =>
+            HttpGetPriceFailureResponse(exception.getMessage, replyTo)
+
         }
         Behaviors.same
 
-      case HttpGetPriceResponse(success, entity, replyTo) => {
-
+      case HttpGetPriceSuccessResponse(entity, replyTo) => {
         val futureEntity = entity.toStrict(10.seconds)
         import system.dispatcher
-        val map = futureEntity.map(entity => entity.data.utf8String).onComplete(println)
-        println(s"Response Value $success:" + map)
+        val map = futureEntity//.map(entity => entity.data.utf8String)
+        context.pipeToSelf(futureEntity) {
+          case Success(httpEntity) =>
+            EntityGetPriceSuccessResponse(httpEntity.data.utf8String, replyTo)
+          case Failure(exception) =>
+            EntityGetPriceSuccessResponse(exception.getMessage, replyTo)
+        }
+        //println(s"Response Value $success:" + map)
         Behaviors.same
       }
-
+      case EntityGetPriceSuccessResponse(entityString, replyTo) =>
+        println("In Here: " + entityString)
+        Behaviors.same
+      case EntityGetPriceFailureResponse(exceptionMessage, replyTo) =>
+        println("Error" + exceptionMessage)
+        Behaviors.same
     }
 
     }
