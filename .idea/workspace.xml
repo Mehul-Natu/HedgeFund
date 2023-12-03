@@ -5,11 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c5e75d62-e904-4a8b-82f3-85ef60304495" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/scala/stocks/Portfolio.scala" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/scala/stocks/StockManager.scala" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/scala/stocks/Test.scala" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/clients/FMPClientHandler.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/clients/FMPClientHandler.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/clients/FMPClientHandler.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/clients/AVClientHandler.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/stocks/StockManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/stocks/StockManager.scala" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -81,7 +79,7 @@
 }]]></component>
   <component name="RunManager">
     <configuration name="FMPClientHandler" type="Application" factoryName="Application" temporary="true">
-      <option name="MAIN_CLASS_NAME" value="clients.FMPClientHandler" />
+      <option name="MAIN_CLASS_NAME" value="clients.AVClientHandler" />
       <module name="HedgeFund" />
       <extension name="coverage">
         <pattern>

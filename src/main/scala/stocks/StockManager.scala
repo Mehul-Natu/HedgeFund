@@ -2,8 +2,8 @@ package stocks
 
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
-import clients.FMPClientHandler
-import clients.FMPClientHandler.HttpRequestAndResponse
+import clients.AVClientHandler
+import clients.AVClientHandler.HttpRequestAndResponse
 import stocks.Stock.{GetStockPrice, StockRequestResponse}
 
 object StockManager {
@@ -32,7 +32,7 @@ object StockManager {
   Behavior[StockManagerRequest] =
     Behaviors.setup { context =>
 
-      val clientActorRef = context.spawn(FMPClientHandler(), "fmpClient")
+      val clientActorRef = context.spawn(AVClientHandler(), "fmpClient")
 
       Behaviors.receiveMessage {
 

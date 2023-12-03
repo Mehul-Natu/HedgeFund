@@ -12,7 +12,7 @@ import scala.io.Source.fromURL
 import scala.util.{Failure, Success}
 
 
-class FMPClientHandler(val apiKey: String) {
+class AVClientHandler(val apiKey: String) {
 
   def getFullQuote(name: String): String = {
     val json = fromURL(s"https://financialmodelingprep.com/api/v3/quote/${name}?apikey=${apiKey}").mkString
@@ -23,7 +23,7 @@ class FMPClientHandler(val apiKey: String) {
 
 }
 
-object FMPClientHandler {
+object AVClientHandler {
 
   trait HttpRequestAndResponse
   case class HttpGetPriceRequest(stockName: String, exchangeName: String, replyTo: ActorRef[StockRequestResponse]) extends HttpRequestAndResponse
@@ -61,8 +61,8 @@ object FMPClientHandler {
 
       case HttpGetPriceSuccessResponse(entity, replyTo) => {
         val futureEntity = entity.toStrict(10.seconds)
-        import system.dispatcher
-        val map = futureEntity//.map(entity => entity.data.utf8String)
+        //import system.dispatcher
+        //val map = futureEntity//.map(entity => entity.data.utf8String)
         context.pipeToSelf(futureEntity) {
           case Success(httpEntity) =>
             EntityGetPriceSuccessResponse(httpEntity.data.utf8String, replyTo)
@@ -103,7 +103,7 @@ object FMPClientHandler {
     //println(uri2)
 
 
-    val request = Get("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=IBM&apikey=demo")
+    val request = Get(f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&outputsize=compact&symbol=$stock&interval=5min&apikey=RU87HY2CX8VVI0GN")
     println(request)
     request
   }
@@ -114,7 +114,7 @@ object FMPClientHandler {
   //FMPClientHandler.getFullQuote("AAPL")
 
   def main(args: Array[String]): Unit = {
-    val actor = ActorSystem(FMPClientHandler(), "actor")
+    val actor = ActorSystem(AVClientHandler(), "actor")
     actor ! HttpGetPriceRequest("PRAA", "NASDAQ", null)
 
     //val FMPClientHandler = new FMPClientHandler("AlGvLMZ6dIlU7SzF1BnvIGV27et3CYjG")
