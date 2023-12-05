@@ -8,5 +8,4 @@ object HttpClient {
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
   import system.dispatcher
-
 }

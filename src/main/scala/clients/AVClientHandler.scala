@@ -4,8 +4,8 @@ import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.client.RequestBuilding.Get
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpMethod, HttpMethods, HttpProtocols, HttpRequest, HttpResponse, StatusCodes, Uri, headers}
-import akka.util.ByteString
-import stocks.Stock.StockRequestResponse
+
+import actors.Stock.{DailyTimeWindow, EmptyWindowSplit, FifteenMin, IntraDayTimeWindow, IntraDayWindowSplit, OneMin, SixtyMin, FetchedStockPriceWithId, StockRequestResponse, FetchedStockTimeSeriesData, TimeWindow, UpdateStockPrice}
 
 import scala.concurrent.duration.DurationInt
 import scala.io.Source.fromURL
@@ -26,11 +26,30 @@ class AVClientHandler(val apiKey: String) {
 object AVClientHandler {
 
   trait HttpRequestAndResponse
-  case class HttpGetPriceRequest(stockName: String, exchangeName: String, replyTo: ActorRef[StockRequestResponse]) extends HttpRequestAndResponse
-  case class HttpGetPriceSuccessResponse(httpEntity: HttpEntity, replyTo: ActorRef[StockRequestResponse]) extends HttpRequestAndResponse
-  case class HttpGetPriceFailureResponse(message: String, replyTo: ActorRef[StockRequestResponse]) extends HttpRequestAndResponse
-  case class EntityGetPriceSuccessResponse(entityString: String, replyTo: ActorRef[StockRequestResponse]) extends HttpRequestAndResponse
-  case class EntityGetPriceFailureResponse(ExceptionMessage: String, replyTo: ActorRef[StockRequestResponse]) extends HttpRequestAndResponse
+  case class HttpGetPriceRequest(stockName: String, exchangeName: String, replyTo: ActorRef[StockRequestResponse], id: Integer) extends HttpRequestAndResponse
+  case class HttpGetPriceSuccessResponse(httpEntity: HttpEntity, replyTo: ActorRef[StockRequestResponse], id: Integer) extends HttpRequestAndResponse
+  case class HttpFailureResponse(message: String, replyTo: ActorRef[StockRequestResponse], id: Integer) extends HttpRequestAndResponse
+  case class EntityGetPriceSuccessResponse(entityString: String, replyTo: ActorRef[StockRequestResponse], id: Integer) extends HttpRequestAndResponse
+  case class EntityFailureResponse(ExceptionMessage: String, replyTo: ActorRef[StockRequestResponse], id: Integer) extends HttpRequestAndResponse
+
+  case class HttpGetTimeSeriesForIntraDay(stockName: String, exchangeName: String, replyTo: ActorRef[StockRequestResponse],
+                                               intraDayWindowSplit: IntraDayWindowSplit,
+                                               id: Integer) extends HttpRequestAndResponse
+
+  case class HttpGetTimeSeries(stockName: String, exchangeName: String, replyTo: ActorRef[StockRequestResponse],
+                                               timeWindow: TimeWindow,
+                                               id: Integer) extends HttpRequestAndResponse
+
+
+  case class HttpGetTimeSeriesSuccessResponse(httpEntity: HttpEntity, replyTo: ActorRef[StockRequestResponse], id: Integer,
+    timeWindow: TimeWindow, intraDayWindowSplit: IntraDayWindowSplit) extends HttpRequestAndResponse
+
+  case class EntityGetTimeSeriesSuccessResponse(entityString: String, replyTo: ActorRef[StockRequestResponse],
+                                                id: Integer, timeWindow: TimeWindow,
+                                                intraDayWindowSplit: IntraDayWindowSplit) extends HttpRequestAndResponse
+
+
+  //case class HttpTimeSeriesFailureResponse(message: String, replyTo: ActorRef[StockRequestResponse], id: Integer) extends HttpRequestAndResponse
 
 
   import HttpClient._
@@ -40,7 +59,9 @@ object AVClientHandler {
     val apiKeyFMP = ""
 
     Behaviors.receiveMessage {
-      case HttpGetPriceRequest(stockName, exchangeName, replyTo) =>
+      case HttpGetPriceRequest(stockName, exchangeName, replyTo, id) =>
+        context.log.info(s"Recived Reuqet to get price for $stockName ann id: $id")
+
         val request = getPriceRequest(stockName, exchangeName, apiKeyFMP)
         val responseFuture = Http().singleRequest(request)
 
@@ -48,75 +69,156 @@ object AVClientHandler {
           case Success(httpResponse) => httpResponse match {
             case HttpResponse(StatusCodes.OK, headers, entity, _) =>
               println("headers" + headers)
-              HttpGetPriceSuccessResponse(entity, replyTo)
+              HttpGetPriceSuccessResponse(entity, replyTo, id)
             case resp@HttpResponse(code, _, _, _) =>
               resp.discardEntityBytes()
-              HttpGetPriceFailureResponse(code.defaultMessage(), replyTo)
+              HttpFailureResponse(code.defaultMessage(), replyTo, id)
           }
           case Failure(exception) =>
-            HttpGetPriceFailureResponse(exception.getMessage, replyTo)
+            HttpFailureResponse(exception.getMessage, replyTo, id)
 
         }
         Behaviors.same
 
-      case HttpGetPriceSuccessResponse(entity, replyTo) => {
+      case HttpGetTimeSeriesForIntraDay(stockName, exchangeName, replyTo, intraDayWindowSplit, id) =>
+        context.log.info(s"Recived Reuqet to get time series for intra day $intraDayWindowSplit " +
+          s" for $stockName ann id: $id")
+
+        val request = getIntraDayTimeSeriesData(stockName, exchangeName, apiKeyFMP, intraDayWindowSplit)
+        val responseFuture = Http().singleRequest(request)
+
+        context.pipeToSelf(responseFuture) {
+          case Success(httpResponse) => httpResponse match {
+            case HttpResponse(StatusCodes.OK, headers, entity, _) =>
+              println("headers" + headers)
+              HttpGetTimeSeriesSuccessResponse(entity, replyTo, id, IntraDayTimeWindow, intraDayWindowSplit)
+            case resp@HttpResponse(code, _, _, _) =>
+              resp.discardEntityBytes()
+              HttpFailureResponse(code.defaultMessage(), replyTo, id)
+          }
+          case Failure(exception) =>
+            HttpFailureResponse(exception.getMessage, replyTo, id)
+
+        }
+        Behaviors.same
+
+      case HttpGetTimeSeries(stockName, exchangeName, replyTo, timeWindow, id) =>
+        context.log.info(s"Received Request to get time series for non Intra $timeWindow " +
+          s" for $stockName ann id: $id")
+
+        val request = getNonIntraDayTimeSeriesData(stockName, exchangeName, apiKeyFMP, timeWindow)
+        val responseFuture = Http().singleRequest(request)
+
+        context.pipeToSelf(responseFuture) {
+          case Success(httpResponse) => httpResponse match {
+            case HttpResponse(StatusCodes.OK, headers, entity, _) =>
+              //println("headers" + headers)
+              HttpGetTimeSeriesSuccessResponse(entity, replyTo, id, timeWindow, EmptyWindowSplit)
+            case resp@HttpResponse(code, _, _, _) =>
+              resp.discardEntityBytes()
+              HttpFailureResponse(code.defaultMessage(), replyTo, id)
+          }
+          case Failure(exception) =>
+            HttpFailureResponse(exception.getMessage, replyTo, id)
+
+        }
+        Behaviors.same
+
+      case HttpGetPriceSuccessResponse(entity, replyTo, id) =>
         val futureEntity = entity.toStrict(10.seconds)
         //import system.dispatcher
         //val map = futureEntity//.map(entity => entity.data.utf8String)
         context.pipeToSelf(futureEntity) {
           case Success(httpEntity) =>
-            EntityGetPriceSuccessResponse(httpEntity.data.utf8String, replyTo)
+            EntityGetPriceSuccessResponse(httpEntity.data.utf8String, replyTo, id)
           case Failure(exception) =>
-            EntityGetPriceSuccessResponse(exception.getMessage, replyTo)
+            EntityFailureResponse(exception.getMessage, replyTo, id)
         }
         //println(s"Response Value $success:" + map)
         Behaviors.same
-      }
-      case EntityGetPriceSuccessResponse(entityString, replyTo) =>
-        println("In Here: " + entityString)
+
+
+      case HttpGetTimeSeriesSuccessResponse(entity, replyTo, id, timeWindow, intraDayWindowSplit) =>
+        val futureEntity = entity.toStrict(10.seconds)
+        //import system.dispatcher
+        //val map = futureEntity//.map(entity => entity.data.utf8String)
+        context.pipeToSelf(futureEntity) {
+          case Success(httpEntity) =>
+            EntityGetTimeSeriesSuccessResponse(httpEntity.data.utf8String, replyTo, id, timeWindow, intraDayWindowSplit)
+          case Failure(exception) =>
+            EntityFailureResponse(exception.getMessage, replyTo, id)
+        }
+        //println(s"Response Value $success:" + map)
         Behaviors.same
-      case EntityGetPriceFailureResponse(exceptionMessage, replyTo) =>
+
+      case EntityGetPriceSuccessResponse(entityString, replyTo, id) =>
+        context.log.info(s"Received Entity Success for id: $id")
+        import StockResponseJsonProtocol._
+        import spray.json._
+        val stockData = entityString.parseJson.convertTo[StockDataIntraDay1Min]
+        val price = stockData.`Time Series (1min)`(stockData.`Meta Data`.`3. Last Refreshed`).`4. close`
+        println("In Here: " + stockData.`Time Series (1min)`.get(stockData.`Meta Data`.`3. Last Refreshed`))
+        replyTo ! FetchedStockPriceWithId(price.toDouble, id)
+        Behaviors.same
+
+      case EntityGetTimeSeriesSuccessResponse(entityString, replyTo, id, timeWindow, intraDayWindowSplit) =>
+        context.log.info(s"Time Series Data time window [$timeWindow]")
+        //context.log.info(s"response = $entityString")
+        import StockResponseJsonProtocol._
+        import spray.json._
+        timeWindow match {
+          case IntraDayTimeWindow =>
+            intraDayWindowSplit match {
+              case OneMin =>
+                val stockData = entityString.parseJson.convertTo[StockDataIntraDay1Min]
+                replyTo ! FetchedStockTimeSeriesData(stockData, timeWindow, intraDayWindowSplit, id)
+              case FifteenMin =>
+                val stockData = entityString.parseJson.convertTo[StockDataIntraDay15Min]
+                replyTo ! FetchedStockTimeSeriesData(stockData, timeWindow, intraDayWindowSplit, id)
+              case SixtyMin => val stockData = entityString.parseJson.convertTo[StockDataIntraDay60Min]
+                replyTo ! FetchedStockTimeSeriesData(stockData, timeWindow, intraDayWindowSplit, id)
+            }
+            Behaviors.same
+          case DailyTimeWindow =>
+            val stockData = entityString.parseJson.convertTo[StockDataDaily]
+            replyTo ! FetchedStockTimeSeriesData(stockData, timeWindow, intraDayWindowSplit, id)
+            Behaviors.same
+        }
+
+
+      case EntityFailureResponse(exceptionMessage, replyTo, id) =>
         println("Error" + exceptionMessage)
+        //TODO Mehul complete this
+        //replyTo !
         Behaviors.same
     }
 
     }
   )
 
-
-  def sendRequest(request: HttpRequest) = {
-    //Http().
+  def getPriceRequest(stock: String, exchangeName: String, apiKey: String): HttpRequest = {
+    val request = Get(f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&outputsize=compact&symbol=$stock&interval=1min&apikey=RU87HY2CX8VVI0GN")
+    //println(request)
+    request
   }
 
-
-  def getPriceRequest(stock: String, exchangeName: String, apiKey: String): HttpRequest = {
-    val uri = s"https://financialmodelingprep.com/api/v3/search-ticker?query=${stock}&limit=10&exchange=${exchangeName}?apikey=$apiKey"
-    val uri2 = s"https://financialmodelingprep.com/api/v3/quote/${stock}?apikey=${apiKey}"
-    val uriWithoutAPiKey = s"https://financialmodelingprep.com/api/v3/search-ticker?query=${stock}&limit=10&exchange=${exchangeName}"
-     HttpRequest(
-      method = HttpMethods.GET,
-      uri = uri,
-       protocol = HttpProtocols.`HTTP/2.0`,
-      //headers = List(headers.RawHeader("Authorization", apiKey)),
-    )
-    //
-    //println(uri2)
-
-
-    val request = Get(f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&outputsize=compact&symbol=$stock&interval=5min&apikey=RU87HY2CX8VVI0GN")
+  def getIntraDayTimeSeriesData(stock: String, exchangeName: String, apiKey: String, intraDayWindowSplit: IntraDayWindowSplit): HttpRequest = {
+    val request = Get(f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&outputsize=compact&symbol=$stock&interval=${intraDayWindowSplit.getString}&apikey=RU87HY2CX8VVI0GN")
     println(request)
     request
   }
 
-
-  //AAPL
-  //val FMPClientHandler = new FMPClientHandler("AlGvLMZ6dIlU7SzF1BnvIGV27et3CYjG")
-  //FMPClientHandler.getFullQuote("AAPL")
+  def getNonIntraDayTimeSeriesData(stock: String, exchangeName: String, apiKey: String, timeWindow: TimeWindow): HttpRequest = {
+    val request = Get(f"https://www.alphavantage.co/query?function=${timeWindow.getString}&symbol=$stock&apikey=RU87HY2CX8VVI0GN")
+    println(request)
+    request
+  }
 
   def main(args: Array[String]): Unit = {
     val actor = ActorSystem(AVClientHandler(), "actor")
-    actor ! HttpGetPriceRequest("PRAA", "NASDAQ", null)
-
+    //actor ! HttpGetPriceRequest("PRAA", "NASDAQ", null, 1)
+    //actor ! HttpGetTimeSeriesForIntraDay("PRAA", "NASDAQ", null, SixtyMin, 1)
+    actor ! HttpGetTimeSeries("PRAA", "NASDAQ", null, DailyTimeWindow, 1)
     //val FMPClientHandler = new FMPClientHandler("AlGvLMZ6dIlU7SzF1BnvIGV27et3CYjG")
     //FMPClientHandler.getFullQuote("AAPL")
   }
