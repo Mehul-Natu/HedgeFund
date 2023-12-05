@@ -5,31 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c5e75d62-e904-4a8b-82f3-85ef60304495" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/sbt__ch_qos_logback_logback_classic_1_2_11_jar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/sbt__ch_qos_logback_logback_core_1_2_11_jar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/sbt__io_spray_spray_json_2_13_1_3_5_jar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/logback.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/scala/HedgeFundApplication.scala" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/scala/actors/BasicTypedActor.scala" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/scala/actors/Stock.scala" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/scala/actors/StockManager.scala" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/scala/actors/Test.scala" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/scala/clients/ResponseModels.scala" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/scala/models/PortfolioTotalResponse.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/sbt__com_typesafe_akka_akka_http_2_13_10_5_0_jar.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/sbt__com_typesafe_akka_akka_http_2_13_10_2_0_jar.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/sbt__com_typesafe_akka_akka_http_core_2_13_10_5_0_jar.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/sbt__com_typesafe_akka_akka_http_core_2_13_10_2_0_jar.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/sbt__com_typesafe_akka_akka_http_spray_json_2_13_10_5_0_jar.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/sbt__com_typesafe_akka_akka_http_spray_json_2_13_10_2_0_jar.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/sbt__com_typesafe_akka_akka_parsing_2_13_10_5_0_jar.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/sbt__com_typesafe_akka_akka_parsing_2_13_10_2_0_jar.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/sbt__io_spray_spray_json_2_13_1_3_6_jar.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/HedgeFund-build.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/HedgeFund-build.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/HedgeFund.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/HedgeFund.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.sbt" beforeDir="false" afterPath="$PROJECT_DIR$/build.sbt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/clients/AVClientHandler.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/clients/AVClientHandler.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/clients/HttpClient.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/clients/HttpClient.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/stocks/Portfolio.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/models/Portfolio.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/stocks/StockManager.scala" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/stocks/Test.scala" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -93,17 +69,17 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "last_opened_file_path": "C:/Users/mehul/Documents/College_Grad/Scala/akka-quickstart-scala/akka-quickstart-scala",
-    "project.structure.last.edited": "SDKs",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/mehul/Documents/College_Grad/Sem_3/INFO_7200/Project/DataPrediction/HedgeFund2&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;SDKs&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Application.TestStock">
     <configuration name="FMPClientHandler" type="Application" factoryName="Application" temporary="true">
       <option name="MAIN_CLASS_NAME" value="clients.AVClientHandler" />
