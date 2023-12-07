@@ -1,4 +1,4 @@
-package clients
+package models
 
 import spray.json._
 
@@ -6,14 +6,13 @@ import spray.json._
 trait StockTimeSeriesDataModel
 
 //For Intra Day 5 min window
-
 case class MetaData6(`1. Information`: String, `2. Symbol`: String, `3. Last Refreshed`: String,
                      `4. Interval`: String, `5. Output Size`: String,
                      `6. Time Zone`: String)
 
 case class TimeSeriesData(`1. open`: String, `2. high`: String, `3. low`: String, `4. close`: String, `5. volume`: String)
-
 case class StockDataIntraDay1Min(`Meta Data`: MetaData6, `Time Series (1min)`: Map[String, TimeSeriesData]) extends StockTimeSeriesDataModel
+
 
 //For Intra Day 15 min window
 case class StockDataIntraDay15Min(`Meta Data`: MetaData6, `Time Series (15min)`: Map[String, TimeSeriesData]) extends StockTimeSeriesDataModel
@@ -27,20 +26,48 @@ case class StockDataIntraDay60Min(`Meta Data`: MetaData6, `Time Series (60min)`:
 case class MetaDataDaily(`1. Information`: String, `2. Symbol`: String, `3. Last Refreshed`: String,
                       `4. Output Size`: String,
                      `5. Time Zone`: String)
-
 case class StockDataDaily(`Meta Data`: MetaDataDaily, `Time Series (Daily)`: Map[String, TimeSeriesData]) extends StockTimeSeriesDataModel
 
 
 
 object StockResponseJsonProtocol extends DefaultJsonProtocol {
-    implicit val timeSeriesDataFormat = DefaultJsonProtocol.jsonFormat5(TimeSeriesData)
-    implicit val metaData6Format = jsonFormat6(MetaData6)
-    implicit val stockDataIntraDay1MinFormat = jsonFormat2(StockDataIntraDay1Min)
-    implicit val stockDataIntraDay15MinFormat = jsonFormat2(StockDataIntraDay15Min)
-    implicit val stockDataIntraDay60MinFormat = jsonFormat2(StockDataIntraDay60Min)
+  implicit val timeSeriesDataFormat = DefaultJsonProtocol.jsonFormat5(TimeSeriesData)
+  implicit val metaData6Format = jsonFormat6(MetaData6)
+  implicit val stockDataIntraDay1MinFormat = jsonFormat2(StockDataIntraDay1Min)
+  implicit val stockDataIntraDay15MinFormat = jsonFormat2(StockDataIntraDay15Min)
+  implicit val stockDataIntraDay60MinFormat = jsonFormat2(StockDataIntraDay60Min)
 
   implicit val metaDataDailyFormat = jsonFormat5(MetaDataDaily)
   implicit val stockDataDailyFormat = jsonFormat2(StockDataDaily)
+
+
+  implicit object StockTimeSeriesDataModelFormat extends RootJsonFormat[StockTimeSeriesDataModel] {
+    override def write(obj: StockTimeSeriesDataModel): JsValue =
+      JsObject((obj match {
+        case a: StockDataIntraDay1Min => a.toJson
+        case b: StockDataIntraDay15Min => b.toJson
+        case c: StockDataIntraDay60Min => c.toJson
+        case d: StockDataDaily => d.toJson
+        case unknown => deserializationError(s"json deserialize error: $unknown")
+      }).asJsObject.fields)
+
+    override def read(json: JsValue): StockTimeSeriesDataModel = {
+      val fields = json.asJsObject.fields
+      if (fields.contains("Time Series (Daily)")) {
+        json.convertTo[StockDataDaily]
+      } else if (fields.contains("Time Series (60min)")) {
+        json.convertTo[StockDataIntraDay60Min]
+      } else if (fields.contains("Time Series (15min)")) {
+        json.convertTo[StockDataIntraDay15Min]
+      } else if (fields.contains("Time Series (1min)")) {
+        json.convertTo[StockDataIntraDay1Min]
+      } else {
+        serializationError(s"json serialization error $fields")
+      }
+    }
+  }
+
+  implicit val stockModelToStockTimeSeriesModelFormat = mapFormat[String, StockTimeSeriesDataModel]
 
   }
 

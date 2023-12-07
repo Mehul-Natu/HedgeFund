@@ -35,13 +35,11 @@ AIG,American International Group,Financials
 AMT,American Tower,Real Estate
 AWK,American Water Works,Utilities
 AMP,Ameriprise Financial,Financials
-ABC,AmerisourceBergen,Health Care
 AME,Ametek,Industrials
 AMGN,Amgen,Health Care
 APH,Amphenol,Information Technology
 ADI,Analog Devices,Information Technology
 ANSS,Ansys,Information Technology
-ANTM,Anthem,Health Care
 AON,Aon,Financials
 APA,APA Corporation,Energy
 AAPL,Apple,Information Technology
@@ -58,7 +56,6 @@ AZO,AutoZone,Consumer Discretionary
 AVB,AvalonBay Communities,Real Estate
 AVY,Avery Dennison,Materials
 BKR,Baker Hughes,Energy
-BLL,Ball Corp,Materials
 BAC,Bank of America,Financials
 BBWI,Bath & Body Works Inc.,Consumer Discretionary
 BAX,Baxter International,Health Care
@@ -79,7 +76,6 @@ BMY,Bristol Myers Squibb,Health Care
 AVGO,Broadcom,Information Technology
 BR,Broadridge Financial Solutions,Information Technology
 BRO,Brown & Brown,Financials
-BF.B,Brown–Forman,Consumer Staples
 CHRW,C. H. Robinson,Industrials
 CDNS,Cadence Design Systems,Information Technology
 CZR,Caesars Entertainment,Consumer Discretionary
@@ -179,7 +175,6 @@ EQR,Equity Residential,Real Estate
 ESS,Essex Property Trust,Real Estate
 EL,Estée Lauder Companies,Consumer Staples
 ETSY,Etsy,Consumer Discretionary
-RE,Everest Re,Financials
 EVRG,Evergy,Utilities
 ES,Eversource Energy,Utilities
 EXC,Exelon,Utilities
@@ -188,13 +183,11 @@ EXPD,Expeditors,Industrials
 EXR,Extra Space Storage,Real Estate
 XOM,ExxonMobil,Energy
 FFIV,F5 Networks,Information Technology
-FB,Facebook,Communication Services
 FAST,Fastenal,Industrials
 FRT,Federal Realty Investment Trust,Real Estate
 FDX,FedEx,Industrials
 FIS,Fidelity National Information Services,Information Technology
 FITB,Fifth Third Bancorp,Financials
-FRC,First Republic Bank,Financials
 FE,FirstEnergy,Utilities
 FISV,Fiserv,Information Technology
 FLT,Fleetcor,Information Technology
@@ -202,7 +195,6 @@ FMC,FMC Corporation,Materials
 F,Ford,Consumer Discretionary
 FTNT,Fortinet,Information Technology
 FTV,Fortive,Industrials
-FBHS,Fortune Brands Home & Security,Industrials
 FOXA,Fox Corporation (Class A),Communication Services
 FOX,Fox Corporation (Class B),Communication Services
 BEN,Franklin Resources,Financials
@@ -364,7 +356,6 @@ PENN,Penn National Gaming,Consumer Discretionary
 PNR,Pentair,Industrials
 PBCT,People's United Financial,Financials
 PEP,PepsiCo,Consumer Staples
-PKI,PerkinElmer,Health Care
 PFE,Pfizer,Health Care
 PM,Philip Morris International,Consumer Staples
 PSX,Phillips 66,Energy
@@ -494,7 +485,6 @@ WRK,WestRock,Materials
 WY,Weyerhaeuser,Real Estate
 WHR,Whirlpool Corporation,Consumer Discretionary
 WMB,Williams Companies,Energy
-WLTW,Willis Towers Watson,Financials
 WYNN,Wynn Resorts,Consumer Discretionary
 XEL,Xcel Energy,Utilities
 XLNX,Xilinx,Information Technology
